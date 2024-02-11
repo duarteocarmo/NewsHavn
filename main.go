@@ -2,14 +2,16 @@ package main
 
 import (
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/mmcdole/gofeed"
 	"log"
 	"os"
 	"reflect"
 
-	"github.com/mmcdole/gofeed"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Source struct {
@@ -18,19 +20,26 @@ type Source struct {
 	Getwebsite bool
 	Contentkey string
 }
+
+type DB struct {
+	Conn string
+}
+
 type Config struct {
-	Sources []Source
+	Sources  []Source
+	Database DB
 }
 type FeedParser struct {
 	config Config
 }
 type Article struct {
-	ID      string
-	Title   string
-	Link    string
-	Date    string
-	Content string
-	Source  string
+	ID                string
+	Title             string
+	Link              string
+	Date              string
+	Content           string
+	Source            string
+	TranslatedContent string
 }
 
 func (f *FeedParser) Load(configFilePath string) {
@@ -56,10 +65,36 @@ func (f *FeedParser) Parse() {
 			continue
 		}
 
-		for _, a := range al {
-			log.Printf("ID: %s, Title: %s, Source: %s", a.ID, a.Title, a.Source)
+		log.Println("Parsed ", len(al), " articles from source: ", source.Name)
+
+		if err = insertArticles(f, al); err != nil {
+			log.Println("Error inserting articles: ", err)
+		}
+
+		log.Println("Inserted ", len(al), " articles from source: ", source.Name)
+	}
+}
+
+func insertArticles(f *FeedParser, articles []Article) error {
+
+	db, err := sql.Open("sqlite3", f.config.Database.Conn)
+	if err != nil {
+		log.Println("Error opening database: ", err)
+		return err
+	}
+
+	defer db.Close()
+
+	// db.Exec("CREATE TABLE IF NOT EXISTS articles (id TEXT PRIMARY KEY, title TEXT, link TEXT, date TEXT, content TEXT, source TEXT, translated_content TEXT)")
+
+	for _, article := range articles {
+		_, err = db.Exec("INSERT OR IGNORE INTO articles (id, title, link, date, content, source) VALUES (?, ?, ?, ?, ?, ?)", article.ID, article.Title, article.Link, article.Date, article.Content, article.Source)
+		if err != nil {
+			log.Println("Error inserting article: ", err)
 		}
 	}
+
+	return nil
 }
 
 func uniqueIDFromString(input string) string {
@@ -74,7 +109,6 @@ func parseSource(source Source) ([]Article, error) {
 	var articles []Article
 	var content string
 
-	log.Println("Parsing feed for source: ", source.Name)
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(source.Feed)
 	if err != nil {

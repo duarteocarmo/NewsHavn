@@ -10,5 +10,8 @@
       "feed": "https://morss.it/https://www.dr.dk/nyheder/service/feeds/indland",
       "contentkey": "Content"
     }
-  ]
+  ],
+  "Database": {
+    "conn": "./mydatabase.db"
+  }
 }

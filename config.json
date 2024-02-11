@@ -1,0 +1,14 @@
+{
+  "sources": [
+    {
+      "name": "Berlingske",
+      "feed": "https://www.berlingske.dk/content/21838/rss",
+      "contentkey": "Description"
+    },
+    {
+      "name": "DR",
+      "feed": "https://morss.it/https://www.dr.dk/nyheder/service/feeds/indland",
+      "contentkey": "Content"
+    }
+  ]
+}

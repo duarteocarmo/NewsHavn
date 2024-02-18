@@ -6,8 +6,13 @@
       "contentkey": "Description"
     },
     {
-      "name": "DR",
+      "name": "DR-Indland",
       "feed": "https://morss.it/https://www.dr.dk/nyheder/service/feeds/indland",
+      "contentkey": "Content"
+    },
+    {
+      "name": "DR-CPH",
+      "feed": "https://morss.it/https://www.dr.dk/nyheder/service/feeds/regionale/kbh",
       "contentkey": "Content"
     }
   ],

@@ -7,4 +7,6 @@ run: build
 test: 
 	go test -v ./... -count=1 
 
+c: 
+	go fmt .
 	

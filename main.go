@@ -6,79 +6,56 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/mmcdole/gofeed"
 	"log"
 	"net/http"
 	"os"
 	"reflect"
+	"slices"
 	"strings"
 	"time"
+
+	"github.com/duarteocarmo/hyggenews/types"
+	"github.com/mmcdole/gofeed"
+	"jaytaylor.com/html2text"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Source struct {
-	Name       string
-	Feed       string
-	Getwebsite bool
-	Contentkey string
-}
-
-type DB struct {
-	Conn string
-}
-
-type Config struct {
-	Sources  []Source
-	Database DB
-}
-type FeedParser struct {
-	config Config
-}
-type Article struct {
-	ID                string
-	Title             string
-	Link              string
-	Date              string
-	Content           string
-	Source            string
-	TranslatedContent string
-	TranslatedTitle   string
-}
-
-func (f *FeedParser) Load(configFilePath string) {
+func load(f *types.FeedParser, configFilePath string) *types.FeedParser {
 	file, _ := os.Open(configFilePath)
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	config := Config{}
+	config := types.Config{}
 	err := decoder.Decode(&config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	f.config = config
+	f.Config = config
 
+	return f
 }
-func (f *FeedParser) Parse() {
+
+func parse(f *types.FeedParser) {
 	type Result struct {
-		articles []Article
+		articles []types.Article
 		err      error
 	}
 
 	// Fetch all articles from all sources
 	log.Println("Fetching articles from all sources")
-	ch := make(chan Result, len(f.config.Sources))
+	ch := make(chan Result, len(f.Config.Sources))
 	start := time.Now()
-	for _, source := range f.config.Sources {
+	for _, source := range f.Config.Sources {
 		go func() {
 			a, err := parseSource(source)
 			ch <- Result{a, err}
 		}()
 	}
 
-	var articles []Article
-	for i := 0; i < len(f.config.Sources); i++ {
+	var articles []types.Article
+	for i := 0; i < len(f.Config.Sources); i++ {
 		result := <-ch
 		if result.err != nil {
 			log.Println("Error processing feed: ", result.err)
@@ -87,6 +64,34 @@ func (f *FeedParser) Parse() {
 	}
 	log.Printf("Received %d articles in %s", len(articles), time.Since(start))
 
+	// Remove duplicates
+	seenids := make(map[string]struct{})
+	result := []types.Article{}
+	for _, article := range articles {
+		if _, exists := seenids[article.ID]; !exists {
+			seenids[article.ID] = struct{}{}
+			result = append(result, article)
+		} else {
+			log.Println("Duplicate article: ", article.ID)
+		}
+	}
+	articles = result
+
+	// Remove if already in DB
+	dbArticleIDs := getArticlesFromDB(f)
+	filtered := []types.Article{}
+	for _, article := range articles {
+		if !slices.Contains(dbArticleIDs, article.ID) {
+			filtered = append(filtered, article)
+		}
+	}
+	articles = filtered
+
+	if len(articles) == 0 {
+		log.Println("No articles to process")
+		return
+	}
+
 	// Translate all articles
 	log.Println("Translating all articles")
 	results := make(chan error, len(articles))
@@ -94,7 +99,7 @@ func (f *FeedParser) Parse() {
 	isTitle := false
 	for i := range articles {
 		article := &articles[i]
-		go func(article *Article) {
+		go func(article *types.Article) {
 			var err error
 			article.TranslatedContent, err = translate(article.Content, isTitle)
 			results <- err
@@ -110,6 +115,29 @@ func (f *FeedParser) Parse() {
 	}
 	log.Printf("Translated %d articles in %s", len(articles), time.Since(start))
 
+	// Translate all titles
+	time.Sleep(4 * time.Second)
+	log.Println("Translating all articles")
+	results = make(chan error, len(articles))
+	start = time.Now()
+	isTitle = true
+	for i := range articles {
+		article := &articles[i]
+		go func(article *types.Article) {
+			var err error
+			article.TranslatedTitle, err = translate(article.Title, isTitle)
+			results <- err
+		}(article)
+	}
+	for i := 0; i < len(articles); i++ {
+		e := <-results
+		if e != nil {
+			log.Println("Error translating item: ", err)
+			err = e
+		}
+	}
+	log.Printf("Translated %d article titles in %s", len(articles), time.Since(start))
+
 	// Insert all articles into the database
 	log.Println("Inserting all articles into the database")
 	start = time.Now()
@@ -123,25 +151,12 @@ func (f *FeedParser) Parse() {
 
 }
 
-func jsonEscape(i string) string {
-	b, err := json.Marshal(i)
-	if err != nil {
-		panic(err)
-	}
-	s := string(b)
-	return s[1 : len(s)-1]
-}
-
 func translate(content string, istitle bool) (string, error) {
 
 	const (
-		apiURL            = "https://api.endpoints.anyscale.com/v1/chat/completions"
-		model             = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-		temperature       = 0
-		// topP              = 0.7
-		// topK              = 50
-		// repetitionPenalty = 1
-		// numCompletions    = 1
+		apiURL      = "https://api.together.xyz/v1/chat/completions"
+		model       = "mistralai/Mistral-7B-Instruct-v0.2"
+		temperature = 0
 	)
 
 	if content == "" {
@@ -151,11 +166,11 @@ func translate(content string, istitle bool) (string, error) {
 	var query string
 	var maxTokens int
 	if istitle == true {
-		query = fmt.Sprintf("Translate the following title into English, do not output any notes or explanations, just title when prompted for:\nOriginal Title: %s\nEnglish title:", content)
+		query = fmt.Sprintf("You are a highly skilled and concise professional translator. When you receive a sentence in Danish, your task is to translate it into English. VERY IMPORTANT: Do not output any notes, explanations, alternatives or comments after or before the translation.\n\nDanish sentence: %s\n\nEnglish translation:", content)
 		maxTokens = 50
 
 	} else {
-		query = fmt.Sprintf("You are a highly skilled professional translator. When you receive an article in Danish, your critical task is to translate it into English. You do not output any html, but the actual text of the article. You do not add any notes or explanations. The article to translate will be inside the <article> tags. Once prompted, just output the English translation.\n\n\n<article>\n\n%s\n\n</article>\n\n\nEnglish translation:", content)
+		query = fmt.Sprintf("You are a highly skilled professional translator. When you receive an article in Danish, your critical task is to translate it into English. You do not output any html, but the actual text of the article. You do not add any notes or explanations. The article to translate will be inside the <article> tags. Once prompted, just output the English translation.\n\n\n<article>\n\n%s\n\n</article>\n\n\nHere is the best English translation of the article above:", content)
 		maxTokens = 8400
 	}
 
@@ -170,10 +185,7 @@ func translate(content string, istitle bool) (string, error) {
 	}`
 
 	jsonPayload := fmt.Sprintf(payloadTemplate, model, maxTokens, temperature, query)
-
-	// print json payload
 	payload := strings.NewReader(jsonPayload)
-	log.Println("JSON payload: ", jsonPayload)
 
 	req, err := http.NewRequest("POST", apiURL, payload)
 	if err != nil {
@@ -217,21 +229,70 @@ func translate(content string, istitle bool) (string, error) {
 		log.Println("No content found in the message of the response body.")
 		return "", fmt.Errorf("no content found in the message of the response body")
 	}
+	translation := result.Choices[0].Message.Content
 
-	return result.Choices[0].Message.Content, nil
+	tRatio := float64(len(translation)) / float64(len(content))
+
+	log.Println("=====================================")
+	if tRatio < 0.5 {
+		log.Println("Translation ratio is less than 0.5")
+	}
+	if tRatio > 2.0 && istitle == true {
+		log.Println("Translation ratio is greater than 2.0 and is a title, limiting to first line")
+		translation = strings.Split(translation, "\n")[0]
+	}
+
+	log.Println("Translation ratio: ", tRatio)
+	log.Println("Translated item, isTitle: ", istitle)
+
+	// log.Println("JSON payload: ", jsonPayload)
+	// log.Println("Response: ", response)
+	// log.Println("=====================================")
+
+	return translation, nil
 }
 
-func insertArticles(f *FeedParser, articles []Article) error {
+func getArticlesFromDB(f *types.FeedParser) []string {
+	db, err := sql.Open("sqlite3", f.Config.Database.Conn)
+	if err != nil {
+		log.Println("Error opening database: ", err)
+		return nil
+	}
 
-	db, err := sql.Open("sqlite3", f.config.Database.Conn)
+	defer db.Close()
+
+	rows, err := db.Query("SELECT id FROM articles")
+	if err != nil {
+		log.Println("Error querying database: ", err)
+		return nil
+	}
+
+	defer rows.Close()
+
+	var ids []string
+	for rows.Next() {
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Println("Error scanning row: ", err)
+			return nil
+		}
+		ids = append(ids, id)
+	}
+
+	return ids
+
+}
+
+func insertArticles(f *types.FeedParser, articles []types.Article) error {
+
+	db, err := sql.Open("sqlite3", f.Config.Database.Conn)
 	if err != nil {
 		log.Println("Error opening database: ", err)
 		return err
 	}
 
 	defer db.Close()
-
-	// db.Exec("CREATE TABLE IF NOT EXISTS articles (id TEXT PRIMARY KEY, title TEXT, link TEXT, date TEXT, content TEXT, source TEXT, translated_content TEXT)")
 
 	for _, article := range articles {
 		query := `
@@ -258,16 +319,10 @@ func insertArticles(f *FeedParser, articles []Article) error {
 	return nil
 }
 
-func uniqueIDFromString(input string) string {
-	hasher := sha256.New()
-	hasher.Write([]byte(input))
-	return hex.EncodeToString(hasher.Sum(nil))
-}
-
-func parseSource(source Source) ([]Article, error) {
+func parseSource(source types.Source) ([]types.Article, error) {
 	const minContentLength = 100
 	var err error
-	var articles []Article
+	var articles []types.Article
 	var content string
 
 	fp := gofeed.NewParser()
@@ -297,12 +352,18 @@ func parseSource(source Source) ([]Article, error) {
 			continue
 		}
 
-		articles = append(articles, Article{
+		text, err := html2text.FromString(content)
+		if err != nil {
+			log.Println("Error converting HTML to text: ", err)
+			continue
+		}
+
+		articles = append(articles, types.Article{
 			ID:      uniqueIDFromString(item.Link),
 			Title:   item.Title,
 			Link:    item.Link,
-			Date:    item.Published,
-			Content: content,
+			Date:    item.PublishedParsed.UTC().String(),
+			Content: text,
 			Source:  source.Name,
 		})
 
@@ -311,17 +372,32 @@ func parseSource(source Source) ([]Article, error) {
 	return articles, nil
 }
 
+func NewFeedParser(config string) {
+	f := types.FeedParser{}
+	load(&f, config)
+	parse(&f)
+}
+
+func main() {
+	NewFeedParser("config.json")
+}
+
 func getWebsiteContent(url string) (string, error) {
 	text := fmt.Sprintf("Getting content from website: %s", url)
 	return text, nil
 }
 
-func NewFeedParser(config string) {
-	f := &FeedParser{}
-	f.Load(config)
-	f.Parse()
+func jsonEscape(i string) string {
+	b, err := json.Marshal(i)
+	if err != nil {
+		panic(err)
+	}
+	s := string(b)
+	return s[1 : len(s)-1]
 }
 
-func main() {
-	NewFeedParser("config.json")
+func uniqueIDFromString(input string) string {
+	hasher := sha256.New()
+	hasher.Write([]byte(input))
+	return hex.EncodeToString(hasher.Sum(nil))
 }

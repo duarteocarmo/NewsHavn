@@ -1,5 +1,7 @@
 package types
 
+import "html/template"
+
 type Source struct {
 	Name       string
 	Feed       string
@@ -29,4 +31,5 @@ type Article struct {
 	Source            string
 	TranslatedContent string
 	TranslatedTitle   string
+	HTMLContent 	  template.HTML
 }

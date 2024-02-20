@@ -1,5 +1,5 @@
 build: 
-	go build -o bin/app
+	go build -o bin/app cmd/server/main.go
 
 run: build
 	./bin/app
@@ -8,5 +8,5 @@ test:
 	go test -v ./... -count=1 
 
 c: 
-	go fmt .
+	gofmt -s -w .
 	

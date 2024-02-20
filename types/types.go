@@ -1,16 +1,18 @@
 package types
 
-import "html/template"
+import (
+	"github.com/gorilla/mux"
+	"html/template"
+)
 
-type Source struct {
-	Name       string
-	Feed       string
-	Getwebsite bool
-	Contentkey string
+type Server struct {
+	Router *mux.Router
+	Parser FeedParser
+	Db     DB
 }
 
-type DB struct {
-	Conn string
+type FeedParser struct {
+	Config Config
 }
 
 type Config struct {
@@ -18,8 +20,15 @@ type Config struct {
 	Database DB
 }
 
-type FeedParser struct {
-	Config Config
+type DB struct {
+	Conn string
+}
+
+type Source struct {
+	Name       string
+	Feed       string
+	Getwebsite bool
+	Contentkey string
 }
 
 type Article struct {
@@ -31,5 +40,5 @@ type Article struct {
 	Source            string
 	TranslatedContent string
 	TranslatedTitle   string
-	HTMLContent 	  template.HTML
+	HTMLContent       template.HTML
 }

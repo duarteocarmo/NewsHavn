@@ -13,3 +13,7 @@ c:
 clean-db: 
 	rm mydatabase.db
 	sqlite3 mydatabase.db < sql/init_db.sql
+
+docker: 
+	docker build -t hygge .
+	docker run --rm -p 8080:8080 -v `pwd`:/mydatabase.db -e REPLICA_URL=s3://litestream/mydatabase.db hygge

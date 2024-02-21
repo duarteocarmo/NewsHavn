@@ -71,7 +71,7 @@ func NewServer() {
 		Parser: types.FeedParser{},
 	}
 
-	parser.Load(&s.Parser, "config.json")
+	parser.Load(&s.Parser, "config/config.json")
 
 	s.Db = s.Parser.Config.Database
 

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{{ .TranslatedTitle }}</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇩🇰</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+
+<body>
+    <main>
+        <article>
+            <div class="story-container">
+                <p class="slug-line">
+                    <a class="slug-link" href="/">Back to article list</a>
+                </p>
+                <div class="story-head">
+                    <h1 class="story-title"> {{ .TranslatedTitle }}</h1>
+                    <p><a href="{{ .Link }}" target="_blank">{{ .Source }}</a></p>
+                    <p> {{ .Date.Format "Monday, January 02, 2006 • 3:04 PM MST" }}</p>
+                </div>
+                <div class="hr-line"></div>
+                <div class="paragraphs-container">
+                    {{ .HTMLContent }}
+                    <p class="notice">Warning: This article was translated by a Large Language Model, in case of doubt,
+                        you can always visit <a href="{{ .Link }}">the original source</a>.</p>
+                </div>
+            </div>
+        </article>
+    </main>
+    <div class="hr-line"></div>
+    {{ template "footer" .}}
+</body>
+
+</html>

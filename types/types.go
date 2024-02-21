@@ -3,6 +3,7 @@ package types
 import (
 	"github.com/gorilla/mux"
 	"html/template"
+	"time"
 )
 
 type Server struct {
@@ -35,7 +36,7 @@ type Article struct {
 	ID                string
 	Title             string
 	Link              string
-	Date              string
+	Date              time.Time
 	Content           string
 	Source            string
 	TranslatedContent string

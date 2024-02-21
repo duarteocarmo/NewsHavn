@@ -9,4 +9,7 @@ test:
 
 c: 
 	gofmt -s -w .
-	
+
+clean-db: 
+	rm mydatabase.db
+	sqlite3 mydatabase.db < sql/init_db.sql

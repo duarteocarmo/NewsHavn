@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Hygge News</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇩🇰</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <!-- <p><a class="full-version-link button" href="/about">About</a></p> -->
+    </header>
+    <main>
+        <div class="topic-container">
+            <h1 class="topic-heading">Hygge News</h1>
+            <p>News about Denmark, in English.</p>
+            <div class="hr-line"></div>
+            <p class="topic-date">{{ .Today }}</p>
+            <ul>
+                {{range .Articles }}
+                <li><a class="topic-title" href="/{{ .ID }}">{{ .TranslatedTitle}}</a></li>
+                {{end}}
+            </ul>
+        </div>
+    </main>
+    <div class="hr-line"></div>
+    {{ template "footer" .}}
+</body>
+
+</html>

@@ -1,17 +1,22 @@
 {
   "sources": [
     {
-      "name": "Berlingske",
+      "name": "Berlingske-Denmark",
       "feed": "https://www.berlingske.dk/content/21838/rss",
       "contentkey": "Description"
     },
     {
-      "name": "DR-Indland",
+      "name": "Berlingske-Politics",
+      "feed": "https://www.berlingske.dk/content/23/rss",
+      "contentkey": "Description"
+    },
+    {
+      "name": "DR-Inland",
       "feed": "https://morss.it/https://www.dr.dk/nyheder/service/feeds/indland",
       "contentkey": "Content"
     },
     {
-      "name": "DR-CPH",
+      "name": "DR-Copenhagen",
       "feed": "https://morss.it/https://www.dr.dk/nyheder/service/feeds/regionale/kbh",
       "contentkey": "Content"
     }

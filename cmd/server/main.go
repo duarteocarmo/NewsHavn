@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
@@ -13,7 +14,7 @@ import (
 	"github.com/duarteocarmo/hyggenews/types"
 )
 
-func handleIndex(s *types.Server) http.HandlerFunc {
+func handlePage(s *types.Server, page string) http.HandlerFunc {
 
 	type Page struct {
 		Articles []types.Article
@@ -24,13 +25,15 @@ func handleIndex(s *types.Server) http.HandlerFunc {
 		today := time.Now().Format("Monday, January 2, 2006")
 		articles := db.GetArticles(s)
 
-		t, err := template.ParseFiles("index.html")
+		p := fmt.Sprintf("templates/%s.html", page)
+		t, err := template.ParseFiles(p, "templates/partials/footer.html")
 		if err != nil {
 			log.Println(err)
 		}
 		t.Execute(w, Page{Articles: articles, Today: today})
 	}
 }
+
 func handleArticle(s *types.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -52,7 +55,7 @@ func handleArticle(s *types.Server) http.HandlerFunc {
 		htmlText := "<p>" + strings.Join(lines, "</p><p>") + "</p>"
 		article.HTMLContent = template.HTML(htmlText)
 
-		t, err := template.ParseFiles("article.html")
+		t, err := template.ParseFiles("templates/article.html", "templates/partials/footer.html")
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -72,8 +75,10 @@ func NewServer() {
 
 	s.Db = s.Parser.Config.Database
 
-	s.Router.HandleFunc("/", handleIndex(s))
+	s.Router.HandleFunc("/", handlePage(s, "index"))
+	s.Router.HandleFunc("/about", handlePage(s, "about"))
 	s.Router.HandleFunc("/{id:[a-zA-Z0-9]+}", handleArticle(s))
+	s.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 
 	go func() {
 		for {

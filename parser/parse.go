@@ -170,7 +170,25 @@ func translate(content string, istitle bool) (string, error) {
 		maxTokens = 50
 
 	} else {
-		query = fmt.Sprintf("You are a highly skilled professional translator. When you receive an article in Danish, your critical task is to translate it into English. You do not output any html, but the actual text of the article. You do not add any notes or explanations. The article to translate will be inside the <article> tags. Once prompted, just output the English translation.\n\n\n<article>\n\n%s\n\n</article>\n\n\nHere is the best English translation of the article above:", content)
+		query = fmt.Sprintf(`
+You are a highly skilled professional translator. 
+
+Here are your instructions:
+- When you receive an article in Danish, your critical task is to translate it into English. 
+- You do not output any html, but the actual text of the article. 
+- You do not add any notes or explanations. 
+- The article to translate will be inside the <article> tags. 
+- Once prompted, just output the English translation.
+- Do not output the article of the title, only the content.
+- Make the translation is well formatted and easy to read (no useless line breaks, no extra spaces, etc.)
+
+<article>
+
+%s
+
+</article>
+
+Here is the best English translation of the article above:`, content)
 		maxTokens = 8400
 	}
 
@@ -362,7 +380,7 @@ func parseSource(source types.Source) ([]types.Article, error) {
 			ID:      uniqueIDFromString(item.Link),
 			Title:   item.Title,
 			Link:    item.Link,
-			Date:    item.PublishedParsed.UTC().String(),
+			Date:    item.PublishedParsed.UTC(),
 			Content: text,
 			Source:  source.Name,
 		})

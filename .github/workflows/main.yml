@@ -36,7 +36,7 @@ jobs:
           docker compose up --force-recreate --build -d
           docker ps
         env:
-          - API_KEY=${{ secrets.API_KEY }}
-          - AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-          - AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          - S3_URL=${{ secrets.S3_URL }}
+          API_KEY=${{ secrets.API_KEY }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_URL=${{ secrets.S3_URL }}

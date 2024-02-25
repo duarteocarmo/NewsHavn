@@ -11,8 +11,8 @@ c:
 	gofmt -s -w .
 
 clean-db: 
-	rm mydatabase.db
-	sqlite3 mydatabase.db < sql/init_db.sql
+	@if [ -f mydatabase.db ]; then rm mydatabase.db; fi
+	sqlite3 mydatabase.db < scripts/init_db.sql
 
 docker: 
 	docker build -t hygge .

@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"html/template"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/duarteocarmo/hyggenews/db"
 	"github.com/duarteocarmo/hyggenews/parser"
@@ -65,6 +67,47 @@ func handleArticle(s *types.Server) http.HandlerFunc {
 	}
 }
 
+func handleCategory(s *types.Server) http.HandlerFunc {
+	type CPage struct {
+		Articles []types.Article
+		Today    string
+		Category string
+	}
+
+	today := time.Now().Format("Monday, January 2, 2006")
+	page := "category"
+	categories, err := db.GetCategories(s)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		vars := mux.Vars(r)
+		c := vars["category"]
+
+		if !slices.Contains(categories, c) {
+			http.NotFound(w, r)
+			return
+		}
+
+		articles, err := db.GetArticlesByCategory(s, c)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		p := fmt.Sprintf("templates/%s.html", page)
+		t, err := template.ParseFiles(p, "templates/partials/footer.html")
+		if err != nil {
+			log.Println(err)
+		}
+		t.Execute(w, CPage{Articles: articles, Today: today, Category: c})
+
+	}
+}
+
 func NewServer() {
 	s := &types.Server{
 		Router: mux.NewRouter(),
@@ -78,7 +121,9 @@ func NewServer() {
 	s.Router.HandleFunc("/", handlePage(s, "index"))
 	s.Router.HandleFunc("/about", handlePage(s, "about"))
 	s.Router.HandleFunc("/{id:[a-zA-Z0-9]+}", handleArticle(s))
+	s.Router.HandleFunc("/category/{category}", handleCategory(s))
 	s.Router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+	// handle article category
 
 	go func() {
 		for {

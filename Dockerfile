@@ -14,7 +14,8 @@ RUN tar -C /usr/local/bin -xzf /tmp/litestream.tar.gz
 
 FROM debian:bookworm-slim
 RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    ca-certificates && \
+    ca-certificates \
+    sqlite3 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/server server

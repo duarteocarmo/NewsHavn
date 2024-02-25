@@ -10,8 +10,8 @@ test:
 c: 
 	gofmt -s -w .
 
-clean-db: 
-	@if [ -f mydatabase.db ]; then rm mydatabase.db; fi
+db: 
+	touch mydatabase.db
 	sqlite3 mydatabase.db < scripts/init_db.sql
 
 docker: 

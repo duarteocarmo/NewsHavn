@@ -30,6 +30,7 @@ type Source struct {
 	Feed       string
 	Getwebsite bool
 	Contentkey string
+	Category   string
 }
 
 type Article struct {
@@ -42,4 +43,5 @@ type Article struct {
 	TranslatedContent string
 	TranslatedTitle   string
 	HTMLContent       template.HTML
+	Category          string
 }

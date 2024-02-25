@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS articles (
     Date DATETIME,
     Content TEXT NOT NULL,
     Source VARCHAR(255),
+    Category VARCHAR(255),
     TranslatedContent TEXT,
     TranslatedTitle TEXT
 );

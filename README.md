@@ -10,7 +10,7 @@
 1. Make sure you have set up the env variables (see `.env_example`)
 2. Start DB
 ```bash
-$ just clean-db
+$ just db
 ```
 3. Run
 ```bash

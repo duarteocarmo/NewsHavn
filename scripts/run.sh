@@ -9,6 +9,7 @@ if [ -f ${DB_PATH} ]; then
 else
 	echo "No database found, restoring from replica if exists"
 	litestream restore -config=${LITESTREAM_CONFIG} --if-replica-exists ${DB_PATH}
+	echo "Restored."
 fi
 
 exec litestream replicate -exec "./server" --config ${LITESTREAM_CONFIG}

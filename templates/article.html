@@ -20,8 +20,8 @@
                 </p>
                 <div class="story-head">
                     <h1 class="story-title"> {{ .TranslatedTitle }}</h1>
-                    <p><a href="{{ .Link }}" target="_blank">{{ .Source }}</a></p>
-                    <p> {{ .Date.Format "Monday, January 02, 2006 • 3:04 PM MST" }}</p>
+                    <p><a href="{{ .Link }}" target="_blank">{{ .Source }}</a> <em>in {{ .Category }}</em> </p>
+                    <p> {{ .Date.Format "Monday, January 02, 2006 • 3:04 PM MST" }} - in {{ .Category }}</p>
                 </div>
                 <div class="hr-line"></div>
                 <div class="paragraphs-container">

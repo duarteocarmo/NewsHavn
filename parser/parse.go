@@ -315,8 +315,8 @@ func insertArticles(f *types.FeedParser, articles []types.Article) error {
 	for _, article := range articles {
 		query := `
 			INSERT OR IGNORE INTO articles 
-			(id, title, link, date, content, source, TranslatedContent, TranslatedTitle) 
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+			(id, title, link, date, content, source, TranslatedContent, TranslatedTitle, Category) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`
 		_, err = db.Exec(query,
 			article.ID,
@@ -327,6 +327,7 @@ func insertArticles(f *types.FeedParser, articles []types.Article) error {
 			article.Source,
 			article.TranslatedContent,
 			article.TranslatedTitle,
+			article.Category,
 		)
 
 		if err != nil {
@@ -377,12 +378,13 @@ func parseSource(source types.Source) ([]types.Article, error) {
 		}
 
 		articles = append(articles, types.Article{
-			ID:      uniqueIDFromString(item.Link),
-			Title:   item.Title,
-			Link:    item.Link,
-			Date:    item.PublishedParsed.UTC(),
-			Content: text,
-			Source:  source.Name,
+			ID:       uniqueIDFromString(item.Link),
+			Title:    item.Title,
+			Link:     item.Link,
+			Date:     item.PublishedParsed.UTC(),
+			Content:  text,
+			Source:   source.Name,
+			Category: source.Category,
 		})
 
 	}

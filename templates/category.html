@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Hygge News</title>
+    <title>Hygge News - {{ .Category }}</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <meta name="viewport" content="width=device-width">
     <link rel="icon"
@@ -15,8 +15,8 @@
     </header>
     <main>
         <div class="topic-container">
-            <h1 class="topic-heading">Hygge News</h1>
-            <p>News about Denmark, in English.</p>
+            <h1 class="topic-heading">{{ .Category }}</h1>
+            <p><a href="/">Hygge</a> > {{ .Category }} </p>
             <div class="hr-line"></div>
             <p class="topic-date">{{ .Today }}</p>
             <ul>

@@ -1,0 +1,42 @@
+name: Deploy master
+on:
+  push:
+    
+jobs:
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout source code
+      uses: actions/checkout@v1
+
+    - uses: actions/checkout@master
+    - name: copy directory to server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: 22
+        overwrite: true
+        source: "."
+        target: "/root/projects/hyggenews"
+
+    - uses: appleboy/ssh-action@master
+      name: start docker container as deamon 
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: 22
+        script: |
+          cd projects/hyggenews  
+          docker compose down
+          docker compose up --force-recreate --build -d
+          docker ps
+        env:
+          - API_KEY=${{ secrets.API_KEY }}
+          - AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          - AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          - S3_URL=${{ secrets.S3_URL }}

@@ -179,8 +179,8 @@ Here are your instructions:
 - You do not add any notes or explanations. 
 - The article to translate will be inside the <article> tags. 
 - Once prompted, just output the English translation.
-- Do not output the article of the title, only the content.
-- Make the translation is well formatted and easy to read (no useless line breaks, no extra spaces, etc.)
+- Do not output the title of the article, only the content.
+- Make sure the translation is well formatted and easy to read (no useless line breaks, no extra spaces, etc.)
 
 <article>
 

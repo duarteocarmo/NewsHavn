@@ -16,4 +16,8 @@ clean-db:
 
 docker: 
 	docker build -t hygge .
-	docker run --rm -p 8080:8080 -v `pwd`:/mydatabase.db -e REPLICA_URL=s3://litestream/mydatabase.db hygge
+	docker run -e API_KEY \
+		-e AWS_ACCESS_KEY_ID \
+		-e AWS_SECRET_ACCESS_KEY \
+		-e S3_URL \
+		--rm -p 8080:8080  hygge

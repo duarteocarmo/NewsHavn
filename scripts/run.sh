@@ -2,17 +2,16 @@
 set -e
 
 DB_PATH=mydatabase.db
+LITESTREAM_CONFIG=/config/litestream.yml
 
-cat /etc/litestream.yml
+cat ${LITESTREAM_CONFIG}
 
-# Restore the database if it does not already exist.
 if [ -f ${DB_PATH} ]; then
 	echo "Database already exists, skipping restore"
 else
 	echo "No database found, restoring from replica if exists"
-	litestream restore -v -if-replica-exists -o ${DB_PATH} "${REPLICA_URL}"
+	litestream restore -config=${LITESTREAM_CONFIG} --if-replica-exists ${DB_PATH}
 fi
 
-# Run litestream with your app as the subprocess.
-exec litestream replicate -exec "/usr/local/bin/myapp"
+exec litestream replicate -exec "./server" --config ${LITESTREAM_CONFIG}
 

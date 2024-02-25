@@ -1,0 +1,8 @@
+dbs:
+  - path: mydatabase.db
+    replicas:
+      - type: s3
+        bucket: hyggenews
+        endpoint:  ${S3_URL}
+        region: us-east-1
+        path: mydatabase.db

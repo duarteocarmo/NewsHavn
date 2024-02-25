@@ -10,8 +10,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Install 'just' command runner
+        run: sudo snap install --edge --classic just
       - name: Build
-        run: docker build -t hygge .
+        run: just build
 
   deploy:
     needs: build

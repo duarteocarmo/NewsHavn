@@ -4,8 +4,6 @@ set -e
 DB_PATH=mydatabase.db
 LITESTREAM_CONFIG=/config/litestream.yml
 
-cat ${LITESTREAM_CONFIG}
-
 if [ -f ${DB_PATH} ]; then
 	echo "Database already exists, skipping restore"
 else
@@ -14,4 +12,3 @@ else
 fi
 
 exec litestream replicate -exec "./server" --config ${LITESTREAM_CONFIG}
-

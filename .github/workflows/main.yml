@@ -8,10 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      steps:
-        - run: sudo snap install --edge --classic just
-        - uses: actions/checkout@v4
-        - run: just build
+      - name: build
+        uses: actions/checkout@v4
+        run: sudo snap install --edge --classic just
+        run: just build
 
   deploy:
     needs: build

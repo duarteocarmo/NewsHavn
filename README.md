@@ -1,4 +1,4 @@
-# hyggenews
+# hyggenews 🇩🇰
 
 ## Prerequisites
 

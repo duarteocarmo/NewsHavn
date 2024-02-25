@@ -10,8 +10,7 @@ jobs:
     steps:
       - name: build
         uses: actions/checkout@v4
-        run: sudo snap install --edge --classic just
-        run: just build
+        run: sudo snap install --edge --classic just && just build
 
   deploy:
     needs: build

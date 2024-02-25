@@ -1,12 +1,11 @@
 # hyggenews
 
-## Development
+## Prerequisites
 
-Prerequisites:
-    - [Go](https://go.dev/)
-    - [Just](https://github.com/casey/just)
+* [Go](https://go.dev/)
+* [Just](https://github.com/casey/just)
 
-Development:
+## Run locally
 
 1. Make sure you have set up the env variables (see `.env_example`)
 2. Start DB
@@ -18,10 +17,6 @@ $ just clean-db
 $ just run
 ```
 
-The app should spin up on `localhost:8080`
+The app should spin up on `localhost:8080`. 
 
-
-
-
-
-
+For more options, run `just -l`

@@ -3,6 +3,7 @@ module github.com/duarteocarmo/hyggenews
 go 1.22
 
 require (
+	github.com/gorilla/mux v1.8.1
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/mmcdole/gofeed v1.2.1
 	jaytaylor.com/html2text v0.0.0-20230321000545-74c2419ad056
@@ -11,7 +12,6 @@ require (
 require (
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mmcdole/goxpp v1.1.0 // indirect

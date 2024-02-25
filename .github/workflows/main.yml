@@ -52,5 +52,8 @@ jobs:
           script: |
             cd projects/hyggenews  
             docker compose down
-            docker compose up --force-recreate --build -d
+            docker compose rm -f
+            docker compose build --no-cache
+            docker compose up -d
             docker ps
+

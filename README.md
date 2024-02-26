@@ -1,4 +1,4 @@
-# newshavn 🇩🇰
+# NewsHavn 🇩🇰
 
 ## Prerequisites
 

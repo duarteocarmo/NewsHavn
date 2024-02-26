@@ -1,4 +1,4 @@
-module github.com/duarteocarmo/hyggenews
+module github.com/duarteocarmo/newshavn
 
 go 1.22
 

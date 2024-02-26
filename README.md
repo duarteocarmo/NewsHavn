@@ -1,4 +1,4 @@
-# hyggenews 🇩🇰
+# newshavn 🇩🇰
 
 ## Prerequisites
 

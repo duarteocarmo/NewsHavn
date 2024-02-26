@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  hygge:
+  newshavn:
     build: . 
     ports:
       - "1212:8080"

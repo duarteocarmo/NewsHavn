@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/duarteocarmo/hyggenews/types"
+	"github.com/duarteocarmo/newshavn/types"
 	"github.com/mmcdole/gofeed"
 	"jaytaylor.com/html2text"
 

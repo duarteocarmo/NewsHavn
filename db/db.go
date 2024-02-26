@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/duarteocarmo/hyggenews/types"
+	"github.com/duarteocarmo/newshavn/types"
 )
 
 func GetArticles(s *types.Server) []types.Article {

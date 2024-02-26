@@ -34,7 +34,7 @@ jobs:
           port: 22
           overwrite: true
           source: "."
-          target: "/root/projects/hyggenews"
+          target: "/root/projects/newshavn"
 
       - name: start docker container as deamon
         uses: appleboy/ssh-action@master
@@ -51,7 +51,7 @@ jobs:
           envs: API_KEY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_URL
           script: |
             env
-            cd projects/hyggenews  
+            cd projects/newshavn  
             docker compose down
             docker compose rm -f
             docker compose build --no-cache

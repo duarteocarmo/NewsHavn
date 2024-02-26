@@ -11,9 +11,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/duarteocarmo/hyggenews/db"
-	"github.com/duarteocarmo/hyggenews/parser"
-	"github.com/duarteocarmo/hyggenews/types"
+	"github.com/duarteocarmo/newshavn/db"
+	"github.com/duarteocarmo/newshavn/parser"
+	"github.com/duarteocarmo/newshavn/types"
 )
 
 func handlePage(s *types.Server, page string) http.HandlerFunc {

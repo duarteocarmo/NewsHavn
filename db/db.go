@@ -20,8 +20,8 @@ func GetArticles(s *types.Server) []types.Article {
 	query := `
 		SELECT id, title, link, date, content, source, TranslatedContent, TranslatedTitle 
 		FROM articles
-		WHERE date >= date('now') AND date < date('now', '+1 day')
-		ORDER BY date DESC;
+		ORDER BY date DESC
+		LIMIT 10;
 	`
 	rows, err := db.Query(query)
 	if err != nil {

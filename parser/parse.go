@@ -347,7 +347,7 @@ func parseSource(source types.Source) ([]types.Article, error) {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(source.Feed)
 	if err != nil {
-		log.Println("Error parsing feed: ", err)
+		log.Printf("Error parsing feed: %s, Source: %s\n", err, source.Name)
 		return nil, err
 	}
 
